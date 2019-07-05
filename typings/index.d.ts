@@ -40,9 +40,9 @@ declare module "react-digraph" {
     nodeSize?: number;
     onNodeMouseEnter: (event: any, data: any, hovered: boolean) => void;
     onNodeMouseLeave: (event: any, data: any) => void;
-    onNodeMove: (point: IPoint, id: string, shiftKey: boolean) => void;
-    onNodeSelected: (data: any, id: string, shiftKey: boolean) => void;
-    onNodeUpdate: (point: IPoint, id: string, shiftKey: boolean) => void;
+    onNodeMove: (point: IPoint, id: string, ctrlKey: boolean) => void;
+    onNodeSelected: (data: any, id: string, ctrlKey: boolean) => void;
+    onNodeUpdate: (point: IPoint, id: string, ctrlKey: boolean) => void;
     renderNode?: (
       nodeRef: any,
       data: any,

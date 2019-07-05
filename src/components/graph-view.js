@@ -73,7 +73,7 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
     maxTitleChars: 12,
     maxZoom: 1.5,
     minZoom: 0.15,
-    nodeSize: 154,
+    nodeSize: 30,
     readOnly: false,
     showGraphControls: true,
     zoomDelay: 1000,
@@ -525,7 +525,7 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
   }
 
   handleDelete = (selected: IEdge | INode) => {
-    console.log(" ---------- handleDelete ---------- ");
+    console.log(' ---------- handleDelete ---------- ');
 
     const { canDeleteNode, canDeleteEdge, readOnly } = this.props;
 
@@ -626,6 +626,7 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
   handleSvgClicked = (d: any, i: any) => {
     if (this.isPartOfEdge(d3.event.target)) {
       this.handleEdgeSelected(d3.event);
+
       return; // If any part of the edge is clicked, return
     }
 
@@ -636,8 +637,9 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
         svgClicked: true,
       });
     } else {
-      if (!d3.event.shiftKey && this.props.onBackgroundClick) {
+      if (!d3.event.ctrlKey && this.props.onBackgroundClick) {
         const xycoords = d3.mouse(d3.event.target);
+
         this.props.onBackgroundClick(xycoords[0], xycoords[1], d3.event);
       }
 
@@ -656,7 +658,7 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
         this.syncRenderNode(previousSelection);
       }
 
-      if (!this.props.readOnly && d3.event.shiftKey) {
+      if (!this.props.readOnly && d3.event.ctrlKey) {
         const xycoords = d3.mouse(d3.event.target);
 
         this.props.onCreateNode(xycoords[0], xycoords[1], d3.event);
@@ -666,7 +668,12 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
 
   handleDocumentClick = (event: any) => {
     // Ignore document click if it's in the SVGElement
-    if (event && event.target && event.target.ownerSVGElement != null && event.target.ownerSVGElement === this.graphSvg.current) {
+    if (
+      event &&
+      event.target &&
+      event.target.ownerSVGElement != null &&
+      event.target.ownerSVGElement === this.graphSvg.current
+    ) {
       return;
     }
 
@@ -681,7 +688,7 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
     return !!GraphUtils.findParent(element, '.edge-container');
   }
 
-  handleNodeMove = (position: IPoint, nodeId: string, shiftKey: boolean) => {
+  handleNodeMove = (position: IPoint, nodeId: string, ctrlKey: boolean) => {
     const { canCreateEdge, readOnly } = this.props;
     const nodeMapNode: INodeMapNode | null = this.getNodeById(nodeId);
 
@@ -695,7 +702,7 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
       return;
     }
 
-    if (!shiftKey && !this.state.draggingEdge) {
+    if (!ctrlKey && !this.state.draggingEdge) {
       // node moved
       node.x = position.x;
       node.y = position.y;
@@ -753,7 +760,7 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
     }
   }
 
-  handleNodeUpdate = (position: any, nodeId: string, shiftKey: boolean) => {
+  handleNodeUpdate = (position: any, nodeId: string, ctrlKey: boolean) => {
     const { onUpdateNode, readOnly } = this.props;
 
     if (readOnly) {
@@ -762,7 +769,7 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
 
     // Detect if edge is being drawn and link to hovered node
     // This will handle a new edge
-    if (shiftKey) {
+    if (ctrlKey) {
       this.createNewEdge();
     } else {
       const nodeMap = this.getNodeById(nodeId);
@@ -805,9 +812,14 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
 
   handleNodeMouseLeave = (event: any, data: any) => {
     if (
-      (d3.event && d3.event.toElement && GraphUtils.findParent(d3.event.toElement, '.node')) ||
-      (event && event.relatedTarget && GraphUtils.findParent(event.relatedTarget, '.node')) ||
-      (d3.event && d3.event.buttons === 1) || (event && event.buttons === 1)
+      (d3.event &&
+        d3.event.toElement &&
+        GraphUtils.findParent(d3.event.toElement, '.node')) ||
+      (event &&
+        event.relatedTarget &&
+        GraphUtils.findParent(event.relatedTarget, '.node')) ||
+      (d3.event && d3.event.buttons === 1) ||
+      (event && event.buttons === 1)
     ) {
       // still within a node
       return;

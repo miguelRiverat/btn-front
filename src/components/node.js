@@ -47,14 +47,14 @@ type INodeProps = {
   nodeSize?: number,
   onNodeMouseEnter: (event: any, data: any, hovered: boolean) => void,
   onNodeMouseLeave: (event: any, data: any) => void,
-  onNodeMove: (point: IPoint, id: string, shiftKey: boolean) => void,
+  onNodeMove: (point: IPoint, id: string, ctrlKey: boolean) => void,
   onNodeSelected: (
     data: any,
     id: string,
-    shiftKey: boolean,
+    ctrlKey: boolean,
     event?: any
   ) => void,
-  onNodeUpdate: (point: IPoint, id: string, shiftKey: boolean) => void,
+  onNodeUpdate: (point: IPoint, id: string, ctrlKey: boolean) => void,
   renderNode?: (
     nodeRef: any,
     data: any,
@@ -146,7 +146,7 @@ class Node extends React.Component<INodeProps, INodeState> {
 
   handleMouseMove = () => {
     const mouseButtonDown = d3.event.sourceEvent.buttons === 1;
-    const shiftKey = d3.event.sourceEvent.shiftKey;
+    const ctrlKey = d3.event.sourceEvent.ctrlKey;
     const { nodeSize, layoutEngine, nodeKey, viewWrapperElem } = this.props;
 
     if (!mouseButtonDown) {
@@ -168,7 +168,7 @@ class Node extends React.Component<INodeProps, INodeState> {
       newState.y -= newState.pointerOffset.y;
     }
 
-    if (shiftKey) {
+    if (ctrlKey) {
       this.setState({ drawingEdge: true });
       // draw edge
       // undo the target offset subtraction done by Edge
@@ -192,7 +192,7 @@ class Node extends React.Component<INodeProps, INodeState> {
     this.setState(newState);
     // Never use this.props.index because if the nodes array changes order
     // then this function could move the wrong node.
-    this.props.onNodeMove(newState, this.props.data[nodeKey], shiftKey);
+    this.props.onNodeMove(newState, this.props.data[nodeKey], ctrlKey);
   };
 
   handleDragStart = () => {
@@ -232,18 +232,21 @@ class Node extends React.Component<INodeProps, INodeState> {
       );
     }
 
-    const shiftKey = sourceEvent.shiftKey;
+    const ctrlKey = sourceEvent.ctrlKey;
 
-    onNodeUpdate({ x, y }, data[nodeKey], shiftKey || drawingEdge);
+    onNodeUpdate({ x, y }, data[nodeKey], ctrlKey || drawingEdge);
 
-    onNodeSelected(data, data[nodeKey], shiftKey || drawingEdge, sourceEvent);
+    onNodeSelected(data, data[nodeKey], ctrlKey || drawingEdge, sourceEvent);
   };
 
   handleMouseOver = (event: any) => {
     // Detect if mouse is already down and do nothing.
     let hovered = false;
 
-    if ((d3.event && d3.event.buttons !== 1) || (event && event.buttons !== 1)) {
+    if (
+      (d3.event && d3.event.buttons !== 1) ||
+      (event && event.buttons !== 1)
+    ) {
       hovered = true;
       this.setState({ hovered });
     }
@@ -299,12 +302,19 @@ class Node extends React.Component<INodeProps, INodeState> {
       selected: this.state.selected,
     });
     const nodeTypeXlinkHref = Node.getNodeTypeXlinkHref(data, nodeTypes) || '';
-    const nodeSubtypeXlinkHref = Node.getNodeSubtypeXlinkHref(data, nodeSubtypes) || '';
+    const nodeSubtypeXlinkHref =
+      Node.getNodeSubtypeXlinkHref(data, nodeSubtypes) || '';
 
     // get width and height defined on def element
-    const defSvgNodeElement: any = nodeTypeXlinkHref ? document.querySelector(`defs>${nodeTypeXlinkHref}`) : null;
-    const nodeWidthAttr = defSvgNodeElement ? defSvgNodeElement.getAttribute('width') : 0;
-    const nodeHeightAttr = defSvgNodeElement ? defSvgNodeElement.getAttribute('height') : 0;
+    const defSvgNodeElement: any = nodeTypeXlinkHref
+      ? document.querySelector(`defs>${nodeTypeXlinkHref}`)
+      : null;
+    const nodeWidthAttr = defSvgNodeElement
+      ? defSvgNodeElement.getAttribute('width')
+      : 0;
+    const nodeHeightAttr = defSvgNodeElement
+      ? defSvgNodeElement.getAttribute('height')
+      : 0;
 
     props.width = nodeWidthAttr ? parseInt(nodeWidthAttr, 10) : props.width;
     props.height = nodeHeightAttr ? parseInt(nodeHeightAttr, 10) : props.height;

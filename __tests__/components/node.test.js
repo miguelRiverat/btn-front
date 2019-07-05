@@ -326,7 +326,7 @@ describe('Node component', () => {
       // mock the event property
       d3.event = {
         sourceEvent: {
-          shiftKey: true
+          ctrlKey: true
         }
       };
       output.instance().handleDragEnd();
@@ -335,7 +335,7 @@ describe('Node component', () => {
         "1",
         true
       );
-      expect(onNodeSelected).toHaveBeenCalledWith(nodeData, "1", true, { shiftKey: true });
+      expect(onNodeSelected).toHaveBeenCalledWith(nodeData, "1", true, { ctrlKey: true });
     });
 
     it('moves the element back to the original DOM position', () => {
@@ -394,11 +394,11 @@ describe('Node component', () => {
       expect(onNodeMove).not.toHaveBeenCalled();
     });
 
-    it('calls the onNodeMove callback with the shiftKey pressed', () => {
+    it('calls the onNodeMove callback with the ctrlKey pressed', () => {
       d3.event = {
         sourceEvent: {
           buttons: 1,
-          shiftKey: true
+          ctrlKey: true
         },
         x: 20,
         y: 50
@@ -411,11 +411,11 @@ describe('Node component', () => {
       );
     });
 
-    it('calls the onNodeMove callback with the shiftKey not pressed', () => {
+    it('calls the onNodeMove callback with the ctrlKey not pressed', () => {
       d3.event = {
         sourceEvent: {
           buttons: 1,
-          shiftKey: false
+          ctrlKey: false
         },
         x: 20,
         y: 50
@@ -445,7 +445,7 @@ describe('Node component', () => {
       d3.event = {
         sourceEvent: {
           buttons: 1,
-          shiftKey: false
+          ctrlKey: false
         },
         x: 20,
         y: 50
