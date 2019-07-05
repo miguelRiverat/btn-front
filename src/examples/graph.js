@@ -186,13 +186,11 @@ class Graph extends React.Component<IGraphProps, IGraphState> {
   }
 
   // Helper to find the index of a given node
-  /*
   getNodeIndex(searchNode: INode | any) {
     return this.state.graph.nodes.findIndex(node => {
       return node[NODE_KEY] === searchNode[NODE_KEY];
     });
   }
- */
 
   // Helper to find the index of a given edge
   getEdgeIndex(searchEdge: IEdge) {
@@ -204,15 +202,14 @@ class Graph extends React.Component<IGraphProps, IGraphState> {
   }
 
   // Given a nodeKey, return the corresponding node
-  /*
+  
   getViewNode(nodeKey: string) {
     const searchNode = {};
     searchNode[NODE_KEY] = nodeKey;
     const i = this.getNodeIndex(searchNode);
     return this.state.graph.nodes[i];
   }
- */
-
+ 
   getDiagrams = () => {
     console.log('**** getDiagrams');
     const _this = this;
