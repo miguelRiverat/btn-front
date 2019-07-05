@@ -243,10 +243,7 @@ class Node extends React.Component<INodeProps, INodeState> {
     // Detect if mouse is already down and do nothing.
     let hovered = false;
 
-    if (
-      (d3.event && d3.event.buttons !== 1) ||
-      (event && event.buttons !== 1)
-    ) {
+    if ((d3.event && d3.event.buttons !== 1) || (event && event.buttons !== 1)) {
       hovered = true;
       this.setState({ hovered });
     }
@@ -302,19 +299,12 @@ class Node extends React.Component<INodeProps, INodeState> {
       selected: this.state.selected,
     });
     const nodeTypeXlinkHref = Node.getNodeTypeXlinkHref(data, nodeTypes) || '';
-    const nodeSubtypeXlinkHref =
-      Node.getNodeSubtypeXlinkHref(data, nodeSubtypes) || '';
+    const nodeSubtypeXlinkHref = Node.getNodeSubtypeXlinkHref(data, nodeSubtypes) || '';
 
     // get width and height defined on def element
-    const defSvgNodeElement: any = nodeTypeXlinkHref
-      ? document.querySelector(`defs>${nodeTypeXlinkHref}`)
-      : null;
-    const nodeWidthAttr = defSvgNodeElement
-      ? defSvgNodeElement.getAttribute('width')
-      : 0;
-    const nodeHeightAttr = defSvgNodeElement
-      ? defSvgNodeElement.getAttribute('height')
-      : 0;
+    const defSvgNodeElement: any = nodeTypeXlinkHref ? document.querySelector(`defs>${nodeTypeXlinkHref}`) : null;
+    const nodeWidthAttr = defSvgNodeElement ? defSvgNodeElement.getAttribute('width') : 0;
+    const nodeHeightAttr = defSvgNodeElement ? defSvgNodeElement.getAttribute('height') : 0;
 
     props.width = nodeWidthAttr ? parseInt(nodeWidthAttr, 10) : props.width;
     props.height = nodeHeightAttr ? parseInt(nodeHeightAttr, 10) : props.height;

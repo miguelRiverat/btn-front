@@ -525,7 +525,7 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
   }
 
   handleDelete = (selected: IEdge | INode) => {
-    console.log(' ---------- handleDelete ---------- ');
+    console.log(" ---------- handleDelete ---------- ");
 
     const { canDeleteNode, canDeleteEdge, readOnly } = this.props;
 
@@ -626,7 +626,6 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
   handleSvgClicked = (d: any, i: any) => {
     if (this.isPartOfEdge(d3.event.target)) {
       this.handleEdgeSelected(d3.event);
-
       return; // If any part of the edge is clicked, return
     }
 
@@ -639,7 +638,6 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
     } else {
       if (!d3.event.ctrlKey && this.props.onBackgroundClick) {
         const xycoords = d3.mouse(d3.event.target);
-
         this.props.onBackgroundClick(xycoords[0], xycoords[1], d3.event);
       }
 
@@ -668,12 +666,7 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
 
   handleDocumentClick = (event: any) => {
     // Ignore document click if it's in the SVGElement
-    if (
-      event &&
-      event.target &&
-      event.target.ownerSVGElement != null &&
-      event.target.ownerSVGElement === this.graphSvg.current
-    ) {
+    if (event && event.target && event.target.ownerSVGElement != null && event.target.ownerSVGElement === this.graphSvg.current) {
       return;
     }
 
@@ -812,14 +805,9 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
 
   handleNodeMouseLeave = (event: any, data: any) => {
     if (
-      (d3.event &&
-        d3.event.toElement &&
-        GraphUtils.findParent(d3.event.toElement, '.node')) ||
-      (event &&
-        event.relatedTarget &&
-        GraphUtils.findParent(event.relatedTarget, '.node')) ||
-      (d3.event && d3.event.buttons === 1) ||
-      (event && event.buttons === 1)
+      (d3.event && d3.event.toElement && GraphUtils.findParent(d3.event.toElement, '.node')) ||
+      (event && event.relatedTarget && GraphUtils.findParent(event.relatedTarget, '.node')) ||
+      (d3.event && d3.event.buttons === 1) || (event && event.buttons === 1)
     ) {
       // still within a node
       return;

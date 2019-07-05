@@ -45,8 +45,8 @@ type IGraph = {
   edges: IEdge[],
 };
 
-type IDiagram = {
-  diagram: IGraph[],
+type IDiagram  = {
+  diagram: IGraph[]
 };
 
 // NOTE: Edges must have 'source' & 'target' attributes
@@ -60,11 +60,11 @@ const initGraph: IGraph = {
 };
 
 const diagramaDataMin: IDiagram = [
-  {
-    id: Date.now(),
-    title: new Date().toISOString(),
-  },
-];
+    {
+      id: Date.now(),
+      title: new Date().toISOString()
+    }
+  ];
 
 type IGraphProps = {};
 
@@ -88,6 +88,9 @@ class Graph extends React.Component<IGraphProps, IGraphState> {
       copiedNode: null,
       diagrams: diagramaDataMin,
       layoutEngineType: undefined,
+      nodeInitial: null,
+      nodeFinal : null,
+      level: null,
     };
 
     this.GraphView = React.createRef();
@@ -110,105 +113,114 @@ class Graph extends React.Component<IGraphProps, IGraphState> {
   }
 
   // Given a nodeKey, return the corresponding node
-
   getViewNode(nodeKey: string) {
     const searchNode = {};
-
     searchNode[NODE_KEY] = nodeKey;
     const i = this.getNodeIndex(searchNode);
-
     return this.state.graph.nodes[i];
   }
-
+ 
   getDiagrams = () => {
     console.log('**** getDiagrams');
     const _this = this;
 
-    axios
-      .get('http://34.67.133.106/diagrams')
-      .then(function(response) {
-        _this.setState({ diagrams: response.data });
-      })
-      .catch(function(response) {
-        console.log(response);
-      });
+    axios.get('http://35.193.216.106/diagrams')
+    .then(function (response) {
+      _this.setState({ diagrams : response.data });
+    })
+    .catch(function (response) {
+      console.log(response);
+    });
   };
 
-  changeDiagram = event => {
-    for (let j = 0; j < this.state.diagrams.length; j++) {
-      if (event.target.value == this.state.diagrams[j]._id) {
+  changeDiagram = (event) => {   
+    for (var j = 0; j < this.state.diagrams.length; j++){
+      if(event.target.value == this.state.diagrams[j]._id){
         console.log(this.state.diagrams[j]);
-        this.setState({ graph: this.state.diagrams[j] });
+        this.setState({ graph : this.state.diagrams[j] });
       }
     }
+
+    // Clean Nodes to calculate
+    this.setState({ nodeInitial : null });
+    this.setState({ nodeFinal : null });
   };
 
   newDiagram = () => {
-    const newGraph: IGraph = {
+    var newGraph: IGraph = {
       id: Date.now(),
       title: new Date().toISOString(),
       edges: [],
       nodes: [],
     };
 
-    this.setState({ graph: newGraph });
+    this.setState({ graph : newGraph });
+
+    // Clean Nodes to calculate
+    this.setState({ nodeInitial : null });
+    this.setState({ nodeFinal : null });
   };
 
   saveorUpdateDiagram = () => {
     const _this = this;
 
-    if (this.state.graph._id) {
-      // Actualizar grafo existente
-      axios
-        .put(
-          'http://34.67.133.106/diagrams/' + this.state.graph._id,
-          this.state.graph
-        )
-        .then(function(response) {
-          console.log(response);
-          _this.getDiagrams();
-        })
-        .catch(function(error) {
-          console.log(error);
-        });
-    } else {
-      // Guardar nuevo grafo
-      axios
-        .post('http://34.67.133.106/diagrams', this.state.graph)
-        .then(function(response) {
-          console.log(response);
-          _this.getDiagrams();
-        })
-        .catch(function(error) {
-          console.log(error);
-        });
+    if(this.state.graph._id){ // Actualizar grafo existente
+      axios.put('http://35.193.216.106/diagrams/'+this.state.graph._id, this.state.graph)
+      .then(function (response) {
+        console.log(response);
+        _this.getDiagrams();
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+    }else{ // Guardar nuevo grafo
+      axios.post('http://35.193.216.106/diagrams', this.state.graph)
+      .then(function (response) {
+        console.log(response);
+        _this.getDiagrams();
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
     }
   };
 
   deleteDiagram = () => {
     const _this = this;
 
-    if (this.state.graph._id) {
-      // Actualizar grafo existente
-      axios
-        .delete('http://34.67.133.106/diagrams/' + this.state.graph._id)
-        .then(function(response) {
-          console.log(response);
-          _this.getDiagrams();
-        })
-        .catch(function(error) {
-          console.log(error);
-        });
-    } else {
-      // Guardar nuevo grafo
+    if(this.state.graph._id){ // Actualizar grafo existente
+      axios.delete('http://35.193.216.106/diagrams/'+this.state.graph._id)
+      .then(function (response) {
+        console.log(response);
+        _this.getDiagrams();
+        _this.newDiagram();
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+    }else{ // Guardar nuevo grafo
       alert('No se puede borrar este elemento');
     }
+
+
+  };
+
+  selectNodeInitial = (event) => {
+    this.setState({ nodeInitial : event.target.value });
+  };
+
+  selectNodeFinal = (event) => {
+    this.setState({ nodeFinal : event.target.value });
   };
 
   calculateDijkstra = () => {
     console.log('**** calculateDijkstra');
-    alert('Un momento mientras se procesa el camino más corto.');
+    console.log('Nodo Inicial: ' + this.state.nodeInitial);
+    console.log('Nodo Final: ' + this.state.nodeFinal);
   };
+
+
+
 
   // Called by 'drag' handler, etc..
   // to sync updates from D3 with the graph
@@ -275,10 +287,7 @@ class Graph extends React.Component<IGraphProps, IGraphState> {
     const graph = this.state.graph;
     // This is just an example - any sort of logic
     // could be used here to determine edge type
-    const type =
-      sourceViewNode.type === SPECIAL_TYPE
-        ? SPECIAL_EDGE_TYPE
-        : EMPTY_EDGE_TYPE;
+    const type = sourceViewNode.type === SPECIAL_TYPE ? SPECIAL_EDGE_TYPE : EMPTY_EDGE_TYPE;
 
     const viewEdge = {
       source: sourceViewNode[NODE_KEY],
@@ -332,7 +341,6 @@ class Graph extends React.Component<IGraphProps, IGraphState> {
   onCopySelected = () => {
     if (this.state.selected.source) {
       console.warn('Cannot copy selected edges, try selecting a node instead.');
-
       return;
     }
 
@@ -358,7 +366,7 @@ class Graph extends React.Component<IGraphProps, IGraphState> {
     this.forceUpdate();
   };
 
-  componentWillMount() {
+  componentWillMount(){
     this.getDiagrams();
   }
 
@@ -368,32 +376,61 @@ class Graph extends React.Component<IGraphProps, IGraphState> {
     const selected = this.state.selected;
     const { NodeTypes, NodeSubtypes, EdgeTypes } = GraphConfig;
 
-    let cbxDiagrams = <select></select>;
+    var cbxDiagrams = <select></select>;
+    if (diagrams.length > 0) {
+      cbxDiagrams =
+        <select onChange={this.changeDiagram} >
+          {
+            diagrams.map((item, key) => (
+              <option key={item._id} value={item._id}> {item.title}</option>
+            ))
+          }
+        </select>;
+    }
 
-    if (diagrams) {
-      cbxDiagrams = (
-        <select onChange={this.changeDiagram}>
-          {diagrams.map((item, key) => (
-            <option key={item._id} value={item._id}>
-              {' '}
-              {item.title}
-            </option>
-          ))}
-        </select>
-      );
+    var cbxNodoInitial = <select></select>;
+    if(nodes.length > 0){
+      cbxNodoInitial = 
+        <select onChange={this.selectNodeInitial} >
+          {
+            nodes.map((item, key) => (
+              <option key={item.id} value={item.id}> {item.id}</option>
+            ))
+          }
+        </select>;
+    }
+
+    var cbxNodoFinal = <select></select>;
+    if(nodes.length > 0){
+      cbxNodoFinal = 
+        <select onChange={this.selectNodeFinal} >
+          {
+            nodes.map((item, key) => (
+              <option key={item.id} value={item.id}> {item.id}</option>
+            ))
+          }
+        </select>;
     }
 
     return (
       <div id="graph">
         <div className="graph-header">
-          <div className="pan-list">
+         <div className="pan-list">
             <span>Cargar:</span>
             {cbxDiagrams}
           </div>
           <button onClick={this.saveorUpdateDiagram}>Guardar</button>
           <button onClick={this.deleteDiagram}>Borrar</button>
           <button onClick={this.newDiagram}>Nuevo</button>
-          <button onClick={this.calculateDijkstra}>Calcular Dijkstra</button>
+          <div className="pan-list">
+            <span>Nodo Inicial:</span>
+            {cbxNodoInitial}
+          </div>
+          <div className="pan-list">
+            <span>Nodo Final:</span>
+            {cbxNodoFinal}
+          </div>
+          <button onClick={this.calculateDijkstra}>Calcular</button>
         </div>
         <GraphView
           ref={el => (this.GraphView = el)}
