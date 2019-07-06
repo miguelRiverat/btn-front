@@ -91,6 +91,7 @@ class Graph extends React.Component<IGraphProps, IGraphState> {
       nodeInitial: null,
       nodeFinal : null,
       level: null,
+      pathResult: null,
     };
 
     this.GraphView = React.createRef();
@@ -202,7 +203,6 @@ class Graph extends React.Component<IGraphProps, IGraphState> {
       alert('No se puede borrar este elemento');
     }
 
-
   };
 
   selectNodeInitial = (event) => {
@@ -215,8 +215,25 @@ class Graph extends React.Component<IGraphProps, IGraphState> {
 
   calculateDijkstra = () => {
     console.log('**** calculateDijkstra');
-    console.log('Nodo Inicial: ' + this.state.nodeInitial);
-    console.log('Nodo Final: ' + this.state.nodeFinal);
+    const _this = this;
+    
+    if(this.state.nodeInitial && this.state.nodeFinal){
+      var data = {
+        startNode: this.state.nodeInitial,
+        endNode: this.state.nodeFinal
+      };
+
+      axios.post('http://35.193.216.106/dijkstra/'+this.state.graph._id, data)
+      .then(function (response) {
+        console.log(response);
+        _this.setState({ pathResult : JSON.stringify(response.data.path) });
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+    }else{ // Guardar nuevo grafo
+      alert('No se puede consultar selecciona los nodos');
+    }
   };
 
 
@@ -256,7 +273,7 @@ class Graph extends React.Component<IGraphProps, IGraphState> {
 
     const viewNode = {
       id: Date.now(),
-      title: '',
+      title: Date.now(),
       type,
       x,
       y,
@@ -375,11 +392,13 @@ class Graph extends React.Component<IGraphProps, IGraphState> {
     const { diagrams } = this.state;
     const selected = this.state.selected;
     const { NodeTypes, NodeSubtypes, EdgeTypes } = GraphConfig;
+    const pathResult = this.state.pathResult;
 
     var cbxDiagrams = <select></select>;
     if (diagrams.length > 0) {
       cbxDiagrams =
         <select onChange={this.changeDiagram} >
+          <option key={null} value={null}></option>
           {
             diagrams.map((item, key) => (
               <option key={item._id} value={item._id}> {item.title}</option>
@@ -392,6 +411,7 @@ class Graph extends React.Component<IGraphProps, IGraphState> {
     if(nodes.length > 0){
       cbxNodoInitial = 
         <select onChange={this.selectNodeInitial} >
+          <option key={null} value={null}></option>
           {
             nodes.map((item, key) => (
               <option key={item.id} value={item.id}> {item.id}</option>
@@ -404,6 +424,7 @@ class Graph extends React.Component<IGraphProps, IGraphState> {
     if(nodes.length > 0){
       cbxNodoFinal = 
         <select onChange={this.selectNodeFinal} >
+          <option key={null} value={null}></option>
           {
             nodes.map((item, key) => (
               <option key={item.id} value={item.id}> {item.id}</option>
@@ -411,6 +432,8 @@ class Graph extends React.Component<IGraphProps, IGraphState> {
           }
         </select>;
     }
+
+    console.log(" ****** " + JSON.stringify(this.state.pathResult));
 
     return (
       <div id="graph">
@@ -431,6 +454,9 @@ class Graph extends React.Component<IGraphProps, IGraphState> {
             {cbxNodoFinal}
           </div>
           <button onClick={this.calculateDijkstra}>Calcular</button>
+          <div className="pan-list">
+            <textarea value={this.state.pathResult} cols={70} rows={3} />
+          </div>
         </div>
         <GraphView
           ref={el => (this.GraphView = el)}
@@ -439,6 +465,7 @@ class Graph extends React.Component<IGraphProps, IGraphState> {
           edges={edges}
           diagrams={diagrams}
           selected={selected}
+          pathResult={pathResult}
           nodeTypes={NodeTypes}
           nodeSubtypes={NodeSubtypes}
           edgeTypes={EdgeTypes}
