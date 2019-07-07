@@ -404,6 +404,7 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
     prevSelectedEdge: any,
     forceRender: boolean = false
   ) {
+    console.log(" ****** addNewEdges ..... ");
     if (!this.state.draggingEdge) {
       let edge = null;
 
@@ -525,8 +526,6 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
   }
 
   handleDelete = (selected: IEdge | INode) => {
-    console.log(" ---------- handleDelete ---------- ");
-
     const { canDeleteNode, canDeleteEdge, readOnly } = this.props;
 
     if (readOnly || !selected) {
@@ -593,6 +592,8 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
   };
 
   handleEdgeSelected = e => {
+    console.log(" ------ handleEdgeSelected ....");
+
     const { source, target } = e.target.dataset;
     let newState = {
       svgClicked: true,
@@ -606,8 +607,7 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
         return;
       }
 
-      const originalArrIndex = (this.getEdgeBySourceTarget(source, target): any)
-        .originalArrIndex;
+      const originalArrIndex = (this.getEdgeBySourceTarget(source, target): any).originalArrIndex;
 
       newState = {
         ...newState,
@@ -624,6 +624,7 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
   };
 
   handleSvgClicked = (d: any, i: any) => {
+    console.log(" ***** handleSvgClicked ....");
     if (this.isPartOfEdge(d3.event.target)) {
       this.handleEdgeSelected(d3.event);
       return; // If any part of the edge is clicked, return
@@ -714,32 +715,34 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
   };
 
   createNewEdge() {
+    
     const { canCreateEdge, nodeKey, onCreateEdge } = this.props;
     const { edgesMap, edgeEndNode, hoveredNodeData } = this.state;
-
+    
     if (!hoveredNodeData) {
       return;
     }
-
+    
     GraphUtils.removeElementFromDom('edge-custom-container');
-
+    
     if (edgeEndNode) {
+      
       const mapId1 = `${hoveredNodeData[nodeKey]}_${edgeEndNode[nodeKey]}`;
       const mapId2 = `${edgeEndNode[nodeKey]}_${hoveredNodeData[nodeKey]}`;
+      
+      console.log(" ***** Modificado por Cristian para permitir ida y vuelta en el edge ....");
 
-      if (
-        edgesMap &&
-        hoveredNodeData !== edgeEndNode &&
-        canCreateEdge &&
-        canCreateEdge(hoveredNodeData, edgeEndNode) &&
-        !edgesMap[mapId1] &&
-        !edgesMap[mapId2]
-      ) {
-        this.setState({
-          componentUpToDate: false,
-          draggedEdge: null,
-          draggingEdge: false,
-        });
+      if (edgesMap 
+        && hoveredNodeData !== edgeEndNode 
+        && canCreateEdge 
+        && canCreateEdge(hoveredNodeData, edgeEndNode) 
+        //&& !edgesMap[mapId1] && !edgesMap[mapId2]
+        ) {
+          this.setState({
+            componentUpToDate: false,
+            draggedEdge: null,
+            draggingEdge: false,
+          });
 
         // we expect the parent website to set the selected property to the new edge when it's created
         onCreateEdge(hoveredNodeData, edgeEndNode);
@@ -804,6 +807,7 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
   };
 
   handleNodeMouseLeave = (event: any, data: any) => {
+    
     if (
       (d3.event && d3.event.toElement && GraphUtils.findParent(d3.event.toElement, '.node')) ||
       (event && event.relatedTarget && GraphUtils.findParent(event.relatedTarget, '.node')) ||
@@ -1298,6 +1302,7 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
   };
 
   isEdgeSelected = (edge: IEdge) => {
+    console.log( " ****** isEdgeSelected ....");
     return (
       !!this.state.selectedEdgeObj &&
       !!this.state.selectedEdgeObj.edge &&

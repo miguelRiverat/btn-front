@@ -80,9 +80,10 @@ const SpecialChildShape = (
   </symbol>
 );
 
+// Modificado por Cristian
 const EmptyEdgeShape = (
   <symbol viewBox="0 0 50 50" id="emptyEdge">
-    <circle cx="25" cy="25" r="8" fill="currentColor" />
+    <circle cx="0" cy="0" r="0" fill="currentColor" />
   </symbol>
 );
 
@@ -116,16 +117,17 @@ export default {
       shapeId: '#specialChild',
     },
   },
+  // Modificado por Cristian
   NodeTypes: {
     emptyNode: {
       shape: EmptyNodeShape,
       shapeId: '#emptyNode',
-      typeText: 'None',
+      typeText: '- Nodo -',
     },
     empty: {
       shape: CustomEmptyShape,
       shapeId: '#empty',
-      typeText: 'None',
+      typeText: '- Nodo -',
     },
     special: {
       shape: SpecialShape,

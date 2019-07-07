@@ -122,16 +122,12 @@ class Graph extends React.Component<IGraphProps, IGraphState> {
   }
  
   getDiagrams = () => {
-    console.log('**** getDiagrams');
     const _this = this;
 
     axios.get('http://35.193.216.106/diagrams')
     .then(function (response) {
       _this.setState({ diagrams : response.data });
-    })
-    .catch(function (response) {
-      console.log(response);
-    });
+    }).catch(function (response) {  console.log(response); });
   };
 
   changeDiagram = (event) => {   
@@ -166,23 +162,15 @@ class Graph extends React.Component<IGraphProps, IGraphState> {
     const _this = this;
 
     if(this.state.graph._id){ // Actualizar grafo existente
-      axios.put('http://35.193.216.106/diagrams/'+this.state.graph._id, this.state.graph)
-      .then(function (response) {
-        console.log(response);
-        _this.getDiagrams();
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
+      this.updateDiagram().then((idResponse) => {
+        console.log("El diagrama se actualizó correctamente ----- " + idResponse);
+        alert("El diagrama se actualizó correctamente")
+      }).catch(err => console.log("Error al actualizar el Diagrama: ", err));
     }else{ // Guardar nuevo grafo
-      axios.post('http://35.193.216.106/diagrams', this.state.graph)
-      .then(function (response) {
-        console.log(response);
-        _this.getDiagrams();
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
+      this.saveDiagram().then((idResponse) => {
+        console.log("El diagrama se guardo correctamente ----- " + idResponse);
+        alert("El diagrama se guardó correctamente")
+      }).catch(err => console.log("Error al guardar el Diagrama: ", err));
     }
   };
 
@@ -213,24 +201,62 @@ class Graph extends React.Component<IGraphProps, IGraphState> {
     this.setState({ nodeFinal : event.target.value });
   };
 
-  calculateDijkstra = () => {
+
+  updateDiagram () {
+    const _this = this;
+    return axios.put('http://35.193.216.106/diagrams/'+this.state.graph._id, this.state.graph)
+    .then((response) => {
+      _this.getDiagrams(); // Actualizar Diagrama
+      return response.data._id;
+    });
+  };
+
+  saveDiagram () {
+    const _this = this;
+    return axios.post('http://35.193.216.106/diagrams', this.state.graph)
+    .then((response) => {
+      this.setState({ graph : response.data });
+      _this.getDiagrams(); // Guardar Diagrama
+      return response.data._id;
+    });
+  };
+
+  calculateDijkstra (id) {
+    const _this = this;
+
+    var data = {
+      startNode: this.state.nodeInitial,
+      endNode: this.state.nodeFinal
+    };
+
+    return axios.post('http://35.193.216.106/dijkstra/'+ id, data)
+    .then((response) => {
+      _this.setState({ pathResult : JSON.stringify(response.data.path) });
+      return response.data;
+    });
+  };
+
+
+  calculatePath = () => {
     console.log('**** calculateDijkstra');
     const _this = this;
     
     if(this.state.nodeInitial && this.state.nodeFinal){
-      var data = {
-        startNode: this.state.nodeInitial,
-        endNode: this.state.nodeFinal
-      };
-
-      axios.post('http://35.193.216.106/dijkstra/'+this.state.graph._id, data)
-      .then(function (response) {
-        console.log(response);
-        _this.setState({ pathResult : JSON.stringify(response.data.path) });
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
+      if(this.state.graph._id){ // Actualizar grafo existente
+        this.updateDiagram().then((idResponse) => {
+          console.log(" ----- " + idResponse );
+          _this.calculateDijkstra(idResponse).then((response) => {
+            console.log("El diagrama se calculó correctamente ----- " + JSON.stringify(response));
+          }).catch(err => console.log("Error al calcular el Diagrama: ", err));    
+        }).catch(err => console.log("Error al actualizar el Diagrama: ", err));
+      }else{ // Guardar nuevo grafo
+        this.saveDiagram().then((idResponse) => {
+          console.log(" ----- " + idResponse );
+          _this.calculateDijkstra(idResponse).then((response) => {
+            console.log("El diagrama se calculó correctamente ----- " + JSON.stringify(response));
+          }).catch(err => console.log("Error al calcular el Diagrama: ", err));
+        }).catch(err => console.log("Error al guardar el Diagrama: ", err));
+      }
     }else{ // Guardar nuevo grafo
       alert('No se puede consultar selecciona los nodos');
     }
@@ -371,9 +397,7 @@ class Graph extends React.Component<IGraphProps, IGraphState> {
 
   onPasteSelected = () => {
     if (!this.state.copiedNode) {
-      console.warn(
-        'No node is currently in the copy queue. Try selecting a node and copying it with Ctrl/Command-C'
-      );
+      console.warn('No node is currently in the copy queue. Try selecting a node and copying it with Ctrl/Command-C');
     }
 
     const graph = this.state.graph;
@@ -433,8 +457,6 @@ class Graph extends React.Component<IGraphProps, IGraphState> {
         </select>;
     }
 
-    console.log(" ****** " + JSON.stringify(this.state.pathResult));
-
     return (
       <div id="graph">
         <div className="graph-header">
@@ -453,7 +475,7 @@ class Graph extends React.Component<IGraphProps, IGraphState> {
             <span>Nodo Final:</span>
             {cbxNodoFinal}
           </div>
-          <button onClick={this.calculateDijkstra}>Calcular</button>
+          <button onClick={this.calculatePath}>Calcular</button>
           <div className="pan-list">
             <textarea value={this.state.pathResult} cols={70} rows={3} />
           </div>
