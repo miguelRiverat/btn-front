@@ -124,7 +124,7 @@ class Graph extends React.Component<IGraphProps, IGraphState> {
   getDiagrams = () => {
     const _this = this;
 
-    axios.get('http://35.193.216.106/diagrams')
+    axios.get('http://34.66.209.47/diagrams')
     .then(function (response) {
       _this.setState({ diagrams : response.data });
     }).catch(function (response) {  console.log(response); });
@@ -178,7 +178,7 @@ class Graph extends React.Component<IGraphProps, IGraphState> {
     const _this = this;
 
     if(this.state.graph._id){ // Actualizar grafo existente
-      axios.delete('http://35.193.216.106/diagrams/'+this.state.graph._id)
+      axios.delete('http://34.66.209.47/diagrams/'+this.state.graph._id)
       .then(function (response) {
         console.log(response);
         _this.getDiagrams();
@@ -203,7 +203,7 @@ class Graph extends React.Component<IGraphProps, IGraphState> {
 
   updateDiagram () {
     const _this = this;
-    return axios.put('http://35.193.216.106/diagrams/'+this.state.graph._id, this.state.graph)
+    return axios.put('http://34.66.209.47/diagrams/'+this.state.graph._id, this.state.graph)
     .then((response) => {
       _this.getDiagrams(); // Actualizar Diagrama
       return response.data._id;
@@ -212,7 +212,7 @@ class Graph extends React.Component<IGraphProps, IGraphState> {
 
   saveDiagram () {
     const _this = this;
-    return axios.post('http://35.193.216.106/diagrams', this.state.graph)
+    return axios.post('http://34.66.209.47/diagrams', this.state.graph)
     .then((response) => {
       this.setState({ graph : response.data });
       _this.getDiagrams(); // Guardar Diagrama
@@ -226,10 +226,10 @@ class Graph extends React.Component<IGraphProps, IGraphState> {
     var data = {
       startNode: this.state.nodeInitial,
       endNode: this.state.nodeFinal,
-      level: this.state.level
+      level: this.state.level === null ? 0 : this.state.level
     };
 
-    return axios.post('http://35.193.216.106/dijkstra/'+ id, data)
+    return axios.post('http://34.66.209.47/dijkstra/'+ id, data)
     .then((response) => {
       if(response && response.data.path){
         console.log('**** ' + JSON.stringify(response.data.path));
