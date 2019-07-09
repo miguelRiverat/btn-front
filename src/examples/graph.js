@@ -90,7 +90,7 @@ class Graph extends React.Component<IGraphProps, IGraphState> {
       layoutEngineType: undefined,
       nodeInitial: null,
       nodeFinal : null,
-      level: null,
+      level: 0,
       pathResult: null,
     };
 
@@ -201,7 +201,6 @@ class Graph extends React.Component<IGraphProps, IGraphState> {
     this.setState({ nodeFinal : event.target.value });
   };
 
-
   updateDiagram () {
     const _this = this;
     return axios.put('http://35.193.216.106/diagrams/'+this.state.graph._id, this.state.graph)
@@ -226,22 +225,28 @@ class Graph extends React.Component<IGraphProps, IGraphState> {
 
     var data = {
       startNode: this.state.nodeInitial,
-      endNode: this.state.nodeFinal
+      endNode: this.state.nodeFinal,
+      level: this.state.level
     };
 
     return axios.post('http://35.193.216.106/dijkstra/'+ id, data)
     .then((response) => {
-      _this.setState({ pathResult : JSON.stringify(response.data.path) });
-      return response.data;
+      if(response && response.data.path){
+        console.log('**** ' + JSON.stringify(response.data.path));
+        _this.setState({ pathResult : JSON.stringify(response.data.path) });
+        return response.data;
+      }else{
+        _this.setState({ pathResult : '["No existe ruta entre esos nodos!!"]' });
+        return " No existe la ruta";
+      }
     });
   };
-
 
   calculatePath = () => {
     console.log('**** calculateDijkstra');
     const _this = this;
     
-    if(this.state.nodeInitial && this.state.nodeFinal){
+    if(this.state.nodeInitial && this.state.nodeFinal && this.state.nodeInitial !== this.state.nodeFinal){
       if(this.state.graph._id){ // Actualizar grafo existente
         this.updateDiagram().then((idResponse) => {
           console.log(" ----- " + idResponse );
@@ -258,11 +263,13 @@ class Graph extends React.Component<IGraphProps, IGraphState> {
         }).catch(err => console.log("Error al guardar el Diagrama: ", err));
       }
     }else{ // Guardar nuevo grafo
-      alert('No se puede consultar selecciona los nodos');
+      alert('No se puede realizar el recorrido con estos nodos');
     }
   };
 
-
+  handleChangeLevel = (event: any) => {
+    this.setState({ level: parseInt(event.target.value) });
+  };
 
 
   // Called by 'drag' handler, etc..
@@ -418,10 +425,10 @@ class Graph extends React.Component<IGraphProps, IGraphState> {
     const { NodeTypes, NodeSubtypes, EdgeTypes } = GraphConfig;
     const pathResult = this.state.pathResult;
 
-    var cbxDiagrams = <select></select>;
+    var cbxDiagrams = <select className="diagram-cmbx"></select>;
     if (diagrams.length > 0) {
       cbxDiagrams =
-        <select onChange={this.changeDiagram} >
+        <select onChange={this.changeDiagram} className="diagram-cmbx">
           <option key={null} value={null}></option>
           {
             diagrams.map((item, key) => (
@@ -431,7 +438,7 @@ class Graph extends React.Component<IGraphProps, IGraphState> {
         </select>;
     }
 
-    var cbxNodoInitial = <select></select>;
+    var cbxNodoInitial = <select className="comboSize"></select>;
     if(nodes.length > 0){
       cbxNodoInitial = 
         <select onChange={this.selectNodeInitial} >
@@ -444,7 +451,7 @@ class Graph extends React.Component<IGraphProps, IGraphState> {
         </select>;
     }
 
-    var cbxNodoFinal = <select></select>;
+    var cbxNodoFinal = <select className="comboSize"></select>;
     if(nodes.length > 0){
       cbxNodoFinal = 
         <select onChange={this.selectNodeFinal} >
@@ -457,27 +464,40 @@ class Graph extends React.Component<IGraphProps, IGraphState> {
         </select>;
     }
 
+    if(pathResult){
+      var listItems = //<li></li>;
+      JSON.parse(pathResult).map((res) =>
+        <li>{res}</li>
+      );
+    }
+
     return (
       <div id="graph">
-        <div className="graph-header">
-         <div className="pan-list">
-            <span>Cargar:</span>
-            {cbxDiagrams}
+        <div className="graph-flex">
+          <div className="graph-header">
+            <div className="element-display">
+              <span>Cargar:</span>{cbxDiagrams}
+            </div>
+            <button onClick={this.saveorUpdateDiagram}>Guardar</button>
+            <button onClick={this.deleteDiagram}>Borrar</button>
+            <button onClick={this.newDiagram}>Nuevo</button>
           </div>
-          <button onClick={this.saveorUpdateDiagram}>Guardar</button>
-          <button onClick={this.deleteDiagram}>Borrar</button>
-          <button onClick={this.newDiagram}>Nuevo</button>
-          <div className="pan-list">
-            <span>Nodo Inicial:</span>
-            {cbxNodoInitial}
+          <div className="graph-path">
+            <div className="element-display">
+              <span>Inicial:</span>{cbxNodoInitial}
+            </div>
+            <div className="element-display">
+              <span>Final: </span>{cbxNodoFinal}
+            </div>
+            <div className="element-display">
+              <span>Nivel:  </span>
+              <input className="level-cmbx" type="number" onBlur={this.handleChangeLevel} placeholder="0"/>
+              <button onClick={this.calculatePath}>Calcular</button>
+            </div>
           </div>
-          <div className="pan-list">
-            <span>Nodo Final:</span>
-            {cbxNodoFinal}
-          </div>
-          <button onClick={this.calculatePath}>Calcular</button>
-          <div className="pan-list">
-            <textarea value={this.state.pathResult} cols={70} rows={3} />
+          <div className="graph-path-result">
+            <span>Recorrido:</span>
+            <ul className="list">{listItems}</ul>
           </div>
         </div>
         <GraphView

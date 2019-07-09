@@ -27,11 +27,21 @@ button {
 #graph {
   height: 100%;
   width: 100%;
+  /*display: flex;*/
+}
+
+.graph-flex {
   display: flex;
 }
 
-.total-nodes {
-  margin-right: 10px;
+.level-cmbx {
+  width: 19%;
+  margin-right: 5px;
+}
+
+.diagram-cmbx {
+  width: 75%;
+  margin-right: 5px;
 }
 
 .app-header {
@@ -56,17 +66,37 @@ button {
 
 .graph-header {
   border-bottom: 1px solid black;
-  position: fixed;
-  width: 100%;
+  width: 20%;
   background-color: #fff;
   padding: 10px;
+}
 
-  .layout-engine, .pan-list {
-    display: inline-block;
-    > span {
-      margin-right: 5px;
-    }
-  }
+.graph-path{
+  border-bottom: 1px solid black;
+  width: 30%;
+  background-color: #fff;
+  padding: 10px;
+}
+
+.graph-path-result{
+  border-bottom: 1px solid black;
+  width: 60%;
+  background-color: #fff;
+}
+
+.comboSize{
+  width: 50%;
+}
+
+.list{
+  width: 300px;
+  height: 55px;
+  overflow: auto;
+}
+
+.element-display{
+  display: block;
+  padding: 5px;
 }
 
 .sidebar {
